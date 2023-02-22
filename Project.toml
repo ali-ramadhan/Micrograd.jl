@@ -1,0 +1,7 @@
+name = "Micrograd"
+uuid = "76e4395f-54b5-48ce-bf79-9d427dd4512b"
+authors = ["ali-ramadhan <ali.hh.ramadhan@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
