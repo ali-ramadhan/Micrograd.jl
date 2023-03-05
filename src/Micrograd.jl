@@ -1,7 +1,7 @@
 module Micrograd
 
-export Value, backward!
-export Neuron, Layer, MultiLayerPerceptron, params
+export Value, backward!, relu
+export Neuron, Layer, MultiLayerPerceptron, params, zero_gradients!
 
 include("value.jl")
 include("nn.jl")
