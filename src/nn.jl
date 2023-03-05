@@ -1,3 +1,5 @@
+import Base: show
+
 rand_uniform(a, b) = a + (b - a) * rand()
 
 struct Neuron{W,B,A}
@@ -19,6 +21,8 @@ end
 
 params(N::Neuron) = vcat(N.w, N.b)
 
+show(io::IO, N::Neuron) = print(io, "Neuron: $(length(N.w)) inputs -> 1 output ($(N.σ))")
+
 struct Layer{N}
     neurons::N
 
@@ -35,6 +39,13 @@ function (L::Layer)(x)
 end
 
 params(L::Layer) = vcat([params(N) for N in L.neurons]...)
+
+function show(io::IO, L::Layer)
+    n_inputs = length(L.neurons[1].w)
+    n_outputs = length(L.neurons)
+    print(io, "Layer ($n_inputs inputs -> $n_outputs outputs) with $(length(L.neurons)) neurons of type: ")
+    show(io, L.neurons[1])
+end
 
 struct MultiLayerPerceptron{L}
     layers::L
@@ -56,3 +67,14 @@ function (M::MultiLayerPerceptron)(x)
 end
 
 params(M::MultiLayerPerceptron) = vcat([params(L) for L in M.layers]...)
+
+function show(io::IO, M::MultiLayerPerceptron)
+    n_inputs = length(M.layers[1].neurons[1].w)
+    n_outputs = length(M.layers[end].neurons)
+    print(io, "MultiLayerPerceptron ($n_inputs inputs -> $n_outputs outputs) with $(length(M.layers)) layers:\n")
+    for (i, layer) in enumerate(M.layers)
+        print(io, "  Layer $i: ")
+        show(io, layer)
+        i != length(M.layers) && print(io, "\n")
+    end
+end
