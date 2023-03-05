@@ -116,6 +116,18 @@ function tanh(x::Value)
     return out
 end
 
+function relu(x::Value)
+    out = Value(max(0, x.data), (x, ))
+
+    function _backward()
+        x.grad += (x.data > 0) * out.grad
+    end
+
+    out.backward = _backward
+
+    return out
+end
+
 #####
 ##### Backpropagation through expression tree
 #####
