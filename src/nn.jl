@@ -9,7 +9,7 @@ struct Neuron{W,B,A}
 
     function Neuron(n, σ=tanh)
         w = [Value(rand_uniform(-1, 1)) for _ in 1:n]
-        b = Value(rand_uniform(-1, 1))
+        b = Value(0.0)
         W = typeof(w)
         B = typeof(b)
         A = typeof(σ)
@@ -21,7 +21,10 @@ end
 
 params(N::Neuron) = vcat(N.w, N.b)
 
-show(io::IO, N::Neuron) = print(io, "Neuron: $(length(N.w)) inputs -> 1 output ($(N.σ))")
+function show(io::IO, N::Neuron)
+    n_inputs = length(N.w)
+    print(io, "Neuron: $n_inputs inputs -> 1 output ($(N.σ))")
+end
 
 struct Layer{N}
     neurons::N
@@ -53,7 +56,7 @@ struct MultiLayerPerceptron{L}
     function MultiLayerPerceptron(n_inputs, n_outputs, σ=tanh)
         layer_sizes = vcat(n_inputs, n_outputs)
         n_layers = length(layer_sizes)
-        layers = [Layer(layer_sizes[i], layer_sizes[i+1], σ) for i in 1:n_layers-1]
+        layers = [Layer(layer_sizes[i], layer_sizes[i+1], i == n_layers-1 ? identity : σ) for i in 1:n_layers-1]
         L = typeof(layers)
         return new{L}(layers)
     end
@@ -76,5 +79,11 @@ function show(io::IO, M::MultiLayerPerceptron)
         print(io, "  Layer $i: ")
         show(io, layer)
         i != length(M.layers) && print(io, "\n")
+    end
+end
+
+function zero_gradients!(model)
+    for p in params(model)
+        p.grad = 0
     end
 end
