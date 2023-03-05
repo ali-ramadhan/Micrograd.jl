@@ -22,8 +22,8 @@ params(N::Neuron) = vcat(N.w, N.b)
 struct Layer{N}
     neurons::N
 
-    function Layer(n_inputs, n_outputs)
-        neurons = [Neuron(n_inputs) for _ in 1:n_outputs]
+    function Layer(n_inputs, n_outputs, σ=tanh)
+        neurons = [Neuron(n_inputs, σ) for _ in 1:n_outputs]
         N = typeof(neurons)
         return new{N}(neurons)
     end
@@ -39,10 +39,10 @@ params(L::Layer) = vcat([params(N) for N in L.neurons]...)
 struct MultiLayerPerceptron{L}
     layers::L
 
-    function MultiLayerPerceptron(n_inputs, n_outputs)
+    function MultiLayerPerceptron(n_inputs, n_outputs, σ=tanh)
         layer_sizes = vcat(n_inputs, n_outputs)
         n_layers = length(layer_sizes)
-        layers = [Layer(layer_sizes[i], layer_sizes[i+1]) for i in 1:n_layers-1]
+        layers = [Layer(layer_sizes[i], layer_sizes[i+1], σ) for i in 1:n_layers-1]
         L = typeof(layers)
         return new{L}(layers)
     end
