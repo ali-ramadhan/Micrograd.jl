@@ -4,19 +4,17 @@ import Base: show, +, -, *, /, ^, inv, tanh
 ##### Value definition
 #####
 
-mutable struct Value{T, C, O, B}
+mutable struct Value{T, C, B}
     data::T
     grad::T
     children::C
-    op::O
     backward::B
 
-    function Value(data, children, op)
+    function Value(data, children)
         children = Set(children)
         D = typeof(data)
         C = typeof(children)
-        O = typeof(op)
-        return new{D,C,O,Function}(data, zero(D), children, op, () -> nothing)
+        return new{D,C,Function}(data, zero(D), children, () -> nothing)
     end
 end
 
@@ -34,7 +32,7 @@ function +(x::Value{T}, y::Value{T}) where T
     x = valueify(x)
     y = valueify(y)
 
-    out = Value(x.data + y.data, (x, y), +)
+    out = Value(x.data + y.data, (x, y))
 
     function _backward()
         x.grad += one(T) * out.grad
@@ -53,7 +51,7 @@ function -(x::Value{T}, y::Value{T}) where T
     x = valueify(x)
     y = valueify(y)
 
-    out = Value(x.data - y.data, (x, y), -)
+    out = Value(x.data - y.data, (x, y))
 
     function _backward()
         x.grad += one(T) * out.grad
@@ -72,7 +70,7 @@ function *(x::Value, y::Value)
     x = valueify(x)
     y = valueify(y)
 
-    out = Value(x.data * y.data, (x, y), *)
+    out = Value(x.data * y.data, (x, y))
 
     function _backward()
         x.grad += y.data * out.grad
@@ -88,7 +86,7 @@ end
 *(x::Value, y) = *(x, valueify(y))
 
 function ^(x::Value, k::Number)
-    out = Value(x.data^k, (x, ), ^)
+    out = Value(x.data^k, (x, ))
 
     function _backward()
         x.grad += k * x.data^(k-1) * out.grad
@@ -107,7 +105,7 @@ inv(x::Value) = ^(x, -1.0)
 
 function tanh(x::Value)
     t = tanh(x.data)
-    out = Value(t, (x, ), tanh)
+    out = Value(t, (x, ))
 
     function _backward()
         x.grad += (1 - t^2) * out.grad
