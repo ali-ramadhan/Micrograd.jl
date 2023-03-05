@@ -16,10 +16,6 @@ using Micrograd
         @test a in c.children
         @test b in c.children
 
-        @test isnothing(a.op)
-        @test isnothing(b.op)
-        @test c.op == +
-
         a = Value(-1.0)
         b = Value(4.5)
         c = a + b

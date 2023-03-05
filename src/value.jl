@@ -18,7 +18,7 @@ mutable struct Value{T, C, B}
     end
 end
 
-Value(data) = Value(data, (), nothing)
+Value(data) = Value(data, ())
 
 show(io::IO, v::Value) = print(io, "Value($(v.data), grad=$(v.grad))")
 
