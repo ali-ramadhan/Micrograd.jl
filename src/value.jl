@@ -26,12 +26,9 @@ show(io::IO, v::Value) = print(io, "Value($(v.data), grad=$(v.grad))")
 #####  Operations and backpropagation rules
 #####
 
-valueify(x) = x isa Value ? x : Value(x)
+valueify(T, x) = x isa Value ? x : Value(convert(T, x))
 
 function +(x::Value{T}, y::Value{T}) where T
-    x = valueify(x)
-    y = valueify(y)
-
     out = Value(x.data + y.data, (x, y))
 
     function _backward()
@@ -44,13 +41,10 @@ function +(x::Value{T}, y::Value{T}) where T
     return out
 end
 
-+(x, y::Value) = +(valueify(x), y)
-+(x::Value, y) = +(x, valueify(y))
++(x, y::Value{T}) where T = +(valueify(T, x), y)
++(x::Value{T}, y) where T = +(x, valueify(T, y))
 
 function -(x::Value{T}, y::Value{T}) where T
-    x = valueify(x)
-    y = valueify(y)
-
     out = Value(x.data - y.data, (x, y))
 
     function _backward()
@@ -63,13 +57,10 @@ function -(x::Value{T}, y::Value{T}) where T
     return out
 end
 
--(x, y::Value) = -(valueify(x), y)
--(x::Value, y) = -(x, valueify(y))
+-(x, y::Value{T}) where T = -(valueify(T, x), y)
+-(x::Value{T}, y) where T = -(x, valueify(T, y))
 
 function *(x::Value, y::Value)
-    x = valueify(x)
-    y = valueify(y)
-
     out = Value(x.data * y.data, (x, y))
 
     function _backward()
@@ -82,14 +73,14 @@ function *(x::Value, y::Value)
     return out
 end
 
-*(x, y::Value) = *(valueify(x), y)
-*(x::Value, y) = *(x, valueify(y))
+*(x, y::Value{T}) where T = *(valueify(T, x), y)
+*(x::Value{T}, y) where T = *(x, valueify(T, y))
 
-function ^(x::Value, k::Number)
+function ^(x::Value{T}, k::Number) where T
     out = Value(x.data^k, (x, ))
 
     function _backward()
-        x.grad += k * x.data^(k-1) * out.grad
+        x.grad += convert(T, k * x.data^(k-1) * out.grad)
     end
 
     out.backward = _backward
@@ -100,8 +91,9 @@ end
 inv(x::Value) = ^(x, -1.0)
 
 /(x::Value, y::Value) = x * ^(y, -1)
-/(x::Value, y) = x * ^(valueify(y), -1)
-/(x, y::Value) = valueify(x) * ^(y, -1)
+
+/(x::Value{T}, y) where T = x * ^(valueify(T, y), -1)
+/(x, y::Value{T}) where T = valueify(T, x) * ^(y, -1)
 
 function tanh(x::Value)
     t = tanh(x.data)
@@ -116,8 +108,8 @@ function tanh(x::Value)
     return out
 end
 
-function relu(x::Value)
-    out = Value(max(0, x.data), (x, ))
+function relu(x::Value{T}) where T
+    out = Value(max(zero(T), x.data), (x, ))
 
     function _backward()
         x.grad += (x.data > 0) * out.grad
