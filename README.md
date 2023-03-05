@@ -4,4 +4,6 @@ A Julia implementation of micrograd, a pedagogical automatic differentiation lib
 
 Can be used to train, for example, simple multi-layer perceptrons to do binary classification:
 
-![Binary classification on overlapping moons](binary_classification_moons.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/ali-ramadhan/Micrograd.jl/main/binary_classifier_moons.png" width="600">
+</p>
